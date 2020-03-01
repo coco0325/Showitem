@@ -12,55 +12,48 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
-public class ShowItemSerialize implements ConfigurationSerializable {
+public class ItemUtils {
 
-    private ItemStack itemStack;
+    public static final String CHANNEL = "ShowItem";
+    private static final Gson GSON = new Gson();
 
-    public void showitemtobungee(Player player, ItemStack itemStack) {
+    public static void broadcastItem(Player player, ItemStack itemStack) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Forward"); // So BungeeCord knows to forward it
         out.writeUTF("ALL");
-        out.writeUTF("MyChannel"); // The channel name to check if this your data
-
-        ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-        DataOutputStream msgout = new DataOutputStream(msgbytes);
-        Gson gson = new Gson();
-        this.itemStack = itemStack;
-        String s = gson.toJson(serialize());
-        try {
+        out.writeUTF(CHANNEL); // The channel name to check if this your data
+        String s = GSON.toJson(serialize(itemStack));
+        try (ByteArrayOutputStream msgbytes = new ByteArrayOutputStream(); DataOutputStream msgout = new DataOutputStream(msgbytes)) {
             msgout.writeUTF(player.getDisplayName());
             msgout.writeUTF(s);
             out.writeShort(msgbytes.toByteArray().length);
             out.write(msgbytes.toByteArray());
-        } catch (IOException exception){
+        } catch (IOException exception) {
             exception.printStackTrace();
         }
-
         player.sendPluginMessage(ShowItem.plugin, "BungeeCord", out.toByteArray());
     }
 
-    public void setItemStack(ItemStack itemStack) {
-        this.itemStack = itemStack;
-    }
 
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> itemMap = new HashMap<>(itemStack.serialize());
-        if (itemStack.hasItemMeta()) {
-            itemMap.put("meta", new HashMap<>(itemStack.getItemMeta().serialize()));
+    public static Map<String, Object> serialize(ItemStack itemStack) {
+        Map<String, Object> itemMap = itemStack.serialize();
+        if (itemStack.getItemMeta() != null) {
+            itemMap.put("meta", itemStack.getItemMeta().serialize());
         }
         return itemMap;
     }
 
-    public ItemStack deserialize(Map<String, Object> map){
-        if (map.get("meta") instanceof Map){
+    @SuppressWarnings("unchecked")
+    public static ItemStack deserialize(Map<String, Object> map) {
+        if (map.get("meta") instanceof Map) {
             Map<String, Object> obj = (Map<String, Object>) map.get("meta");
             Class<?> cls = ConfigurationSerialization.getClassByAlias(ItemMeta.class.getSimpleName());
-            ItemMeta meta = (ItemMeta) ConfigurationSerialization.deserializeObject(obj, (Class<? extends ConfigurationSerializable>) cls);
-            map.put("meta", meta);
+            if (cls != null) {
+                ItemMeta meta = (ItemMeta) ConfigurationSerialization.deserializeObject(obj, (Class<? extends ConfigurationSerializable>) cls);
+                map.put("meta", meta);
+            }
         }
         return ItemStack.deserialize(map);
     }

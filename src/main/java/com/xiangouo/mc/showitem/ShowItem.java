@@ -9,9 +9,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -29,74 +29,15 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
 
     public static Plugin plugin;
 
-    @Override
-    public void onEnable() {
-        plugin = this;
-        ConfigurationSerialization.registerClass(ShowItemSerialize.class);
-        this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
-        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        FileConfiguration config = this.getConfig();
-        config.addDefault("cooldown", 1000);
-        config.addDefault("cooldown-message", "&e展示物品// &7你發送指令太快，請等待 <sec> 秒!");
-        config.addDefault("message", "&e展示物品// &7你展示了 &7<Item> !");
-        config.addDefault("bungee-message", "&e展示物品// &7<player> 展示了 &7<Item> !");
-        config.options().copyDefaults(true);
-        saveConfig();
-        getCommand("showitem").setExecutor(new ShowItemCommand(this));
+    public static String getMessage(String path) {
+        return Optional.ofNullable(plugin.getConfig().getString(path))
+                .map(l -> ChatColor.translateAlternateColorCodes('&', l))
+                .orElseThrow(() -> new IllegalStateException("找不到路徑 " + path));
     }
 
-    @Override
-    public void onDisable() {
-        super.onDisable();
-    }
-
-    @Override
-    public void onPluginMessageReceived(String channel, Player player, byte[] messages) {
-        if (!channel.equals("BungeeCord")) return;
-        ByteArrayDataInput in = ByteStreams.newDataInput(messages);
-        try {
-            String subchannel = in.readUTF();
-            if (subchannel.equalsIgnoreCase("MyChannel")) {
-                final Short length = in.readShort();
-                final byte[] bytesMessage = new byte[length];
-
-                in.readFully(bytesMessage);
-
-                DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(bytesMessage));
-                ShowItemSerialize showItemSerialize = new ShowItemSerialize();
-                String playername = inputStream.readUTF();
-                String input = inputStream.readUTF();
-                Gson gson = new Gson();
-                Map<String, Object> json = gson.fromJson(input, Map.class);
-                ItemStack itemStack = showItemSerialize.deserialize(json);
-                sendItemTooltipMessage(player, playername, itemStack);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    public void sendItemTooltipMessage(Player player, String name, ItemStack item) {
-
-        String s = convertItemStackToJson(item);
-        BaseComponent[] hoverEventComponents = new BaseComponent[]{
-                new TextComponent(s)
-        };
-        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents);
-        String[] message = plugin.getConfig().getString("bungee-message").split("<Item>");
-        String firist = message[0];
-        String second = message[1];
-        TextComponent component = new TextComponent(ChatColor.translateAlternateColorCodes('&', firist.replace("<player>", name)));
-        TextComponent component1 = new TextComponent(ChatColor.translateAlternateColorCodes('&', item.getItemMeta().getDisplayName()));
-        TextComponent component2 = new TextComponent(ChatColor.translateAlternateColorCodes('&', second));
-        component1.setHoverEvent(event);
-        component.addExtra(component1);
-        component.addExtra(component2);
-        player.spigot().sendMessage(component);
-    }
-
+    /*
+    copied from HNMCUtils
+     */
     public static String convertItemStackToJson(ItemStack itemStack) {
         // ItemStack methods to get a net.minecraft.server.ItemStack object for serialization
         Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
@@ -125,5 +66,67 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
 
         // Return a string representation of the serialized object
         return itemAsJsonObject.toString();
+    }
+
+    @Override
+    public void onDisable() {
+        super.onDisable();
+    }
+
+    @Override
+    public void onEnable() {
+        plugin = this;
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        FileConfiguration config = this.getConfig();
+        config.addDefault("cooldown", 1000);
+        config.addDefault("cooldown-message", "&e展示物品// &7你發送指令太快，請等待 <sec> 秒!");
+        config.addDefault("message", "&e展示物品// &7你展示了 &7<Item> !");
+        config.addDefault("bungee-message", "&e展示物品// &7<player> 展示了 &7<Item> !");
+        config.options().copyDefaults(true);
+        saveConfig();
+        Optional.ofNullable(getCommand("showitem")).ifPresent(c -> c.setExecutor(new ShowItemCommand(this)));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onPluginMessageReceived(String channel, Player p, byte[] messages) {
+        if (!channel.equals("BungeeCord")) return;
+        ByteArrayDataInput in = ByteStreams.newDataInput(messages);
+        String subchannel = in.readUTF();
+        if (!subchannel.equalsIgnoreCase(ItemUtils.CHANNEL)) return;
+        final short length = in.readShort();
+        final byte[] bytesMessage = new byte[length];
+        try (DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(bytesMessage))) {
+            in.readFully(bytesMessage);
+            String showingPlayer = inputStream.readUTF();
+            String input = inputStream.readUTF();
+            Gson gson = new Gson();
+            Map<String, Object> json = (Map<String, Object>) gson.fromJson(input, Map.class);
+            ItemStack itemStack = ItemUtils.deserialize(json);
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                sendItemTooltipMessage(player, showingPlayer, itemStack);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public void sendItemTooltipMessage(Player player, String name, ItemStack item) {
+        String s = convertItemStackToJson(item);
+        BaseComponent[] hoverEventComponents = new BaseComponent[]{new TextComponent(s)};
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents);
+        String[] message = getMessage("bungee-message").split("<Item>");
+        String firist = message[0];
+        String second = message[1];
+        TextComponent component = new TextComponent(firist.replace("<player>", name));
+        TextComponent component1 = new TextComponent(Optional.ofNullable(item.getItemMeta()).map(ItemMeta::getDisplayName).orElse(item.getType().toString()));
+        TextComponent component2 = new TextComponent(second);
+        component1.setHoverEvent(event);
+        component.addExtra(component1);
+        component.addExtra(component2);
+        player.spigot().sendMessage(component);
     }
 }
