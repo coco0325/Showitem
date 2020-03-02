@@ -53,8 +53,8 @@ public class ShowItemCommand implements CommandExecutor {
         }
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
-        boolean displayname = Objects.requireNonNull(itemStack.getItemMeta()).hasDisplayName();
-        if (!(itemStack.getType() == Material.AIR)) {
+        if (itemStack.getType() != Material.AIR) {
+            boolean displayname = Objects.requireNonNull(itemStack.getItemMeta()).hasDisplayName();
             ItemUtils.broadcastItem(player, itemStack);
             player.sendMessage(ShowItem.getMessage("message").replace("<Item>", !displayname ? itemStack.getType().toString() : itemStack.getItemMeta().getDisplayName()));
         }
