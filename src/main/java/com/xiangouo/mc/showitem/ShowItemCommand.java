@@ -53,13 +53,14 @@ public class ShowItemCommand implements CommandExecutor {
         }
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
-        if (itemStack.getType() != Material.AIR) {
-            ItemUtils.broadcastItem(player, itemStack);
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                ShowItem.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
-            }
+        if (itemStack.getType() == Material.AIR) {
+            //
         }
-         lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
+        ItemUtils.broadcastItem(player, itemStack);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+        }
+        lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
         return true;
     }
 

@@ -3,6 +3,9 @@ package com.xiangouo.mc.showitem;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
@@ -13,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 public class ItemUtils {
 
@@ -58,5 +62,22 @@ public class ItemUtils {
             }
         }
         return ItemStack.deserialize(map);
+    }
+
+    public static void sendItemTooltipMessage(Player player, String name, ItemStack item) {
+        String s = ReflectionUtil.convertItemStackToJson(item);
+        BaseComponent[] hoverEventComponents = new BaseComponent[]{new TextComponent(s)};
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents);
+        String[] message = ShowItem.getMessage("message").split("<Item>");
+        String first = message[0];
+        String second = message.length < 0 ? message[1] : "";
+        boolean displayname = Objects.requireNonNull(item.getItemMeta()).hasDisplayName();
+        TextComponent component = new TextComponent(first.replace("<player>", name));
+        TextComponent component1 = new TextComponent(!displayname ? item.getType().toString() : item.getItemMeta().getDisplayName());
+        TextComponent component2 = new TextComponent(second);
+        component1.setHoverEvent(event);
+        component.addExtra(component1);
+        component.addExtra(component2);
+        player.spigot().sendMessage(component);
     }
 }
