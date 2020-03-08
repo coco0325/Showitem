@@ -21,9 +21,10 @@ import java.util.Optional;
 public class ShowItem extends JavaPlugin implements PluginMessageListener {
 
     public static Plugin plugin;
+    public static ConfigManager configManager = new ConfigManager();
 
     public static String getMessage(String path) {
-        return Optional.ofNullable(plugin.getConfig().getString(path))
+        return Optional.ofNullable(configManager.getConfig().getString(path))
                 .map(l -> ChatColor.translateAlternateColorCodes('&', l))
                 .orElseThrow(() -> new IllegalStateException("找不到路徑 " + path));
     }
@@ -38,12 +39,7 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
         plugin = this;
         this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        FileConfiguration config = this.getConfig();
-        config.addDefault("cooldown", 1000);
-        config.addDefault("cooldown-message", "&e展示物品// &7你發送指令太快，請等待 <sec> 秒!");
-        config.addDefault("message", "&e展示物品// &7<player> 展示了 &7<Item> !");
-        config.options().copyDefaults(true);
-        saveConfig();
+        configManager.createConfig();
         Optional.ofNullable(getCommand("showitem")).ifPresent(c -> c.setExecutor(new ShowItemCommand(this)));
         Bukkit.getLogger().info(ChatColor.GOLD + "展示插件開啟.....");
     }
