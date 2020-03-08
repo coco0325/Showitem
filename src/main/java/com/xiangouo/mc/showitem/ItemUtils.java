@@ -25,7 +25,9 @@ public class ItemUtils {
         out.writeUTF("ALL");
         out.writeUTF(CHANNEL); // The channel name to check if this your data
         String s = GSON.toJson(serialize(itemStack));
-        try (ByteArrayOutputStream msgbytes = new ByteArrayOutputStream(); DataOutputStream msgout = new DataOutputStream(msgbytes)) {
+        try (
+            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+            DataOutputStream msgout = new DataOutputStream(msgbytes)) {
             msgout.writeUTF(player.getDisplayName());
             msgout.writeUTF(s);
             out.writeShort(msgbytes.toByteArray().length);

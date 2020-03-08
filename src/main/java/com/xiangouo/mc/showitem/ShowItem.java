@@ -67,7 +67,6 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
         // Return a string representation of the serialized object
         return itemAsJsonObject.toString();
     }
-
     @Override
     public void onDisable() {
         super.onDisable();
@@ -81,8 +80,7 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
         FileConfiguration config = this.getConfig();
         config.addDefault("cooldown", 1000);
         config.addDefault("cooldown-message", "&e展示物品// &7你發送指令太快，請等待 <sec> 秒!");
-        config.addDefault("message", "&e展示物品// &7你展示了 &7<Item> !");
-        config.addDefault("bungee-message", "&e展示物品// &7<player> 展示了 &7<Item> !");
+        config.addDefault("message", "&e展示物品// &7<player> 展示了 &7<Item> !");
         config.options().copyDefaults(true);
         saveConfig();
         Optional.ofNullable(getCommand("showitem")).ifPresent(c -> c.setExecutor(new ShowItemCommand(this)));
@@ -114,11 +112,11 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
 
     }
 
-    public void sendItemTooltipMessage(Player player, String name, ItemStack item) {
+    public static void sendItemTooltipMessage(Player player, String name, ItemStack item) {
         String s = convertItemStackToJson(item);
         BaseComponent[] hoverEventComponents = new BaseComponent[]{new TextComponent(s)};
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents);
-        String[] message = getMessage("bungee-message").split("<Item>");
+        String[] message = getMessage("message").split("<Item>");
         String first = message[0];
         String second = message.length < 0 ? message[1] : "";
         boolean displayname = Objects.requireNonNull(item.getItemMeta()).hasDisplayName();
