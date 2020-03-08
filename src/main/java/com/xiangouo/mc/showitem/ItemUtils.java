@@ -17,11 +17,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ItemUtils {
 
     public static final String CHANNEL = "ShowItem";
     private static final Gson GSON = new Gson();
+    private static ConfigManager configManager = new ConfigManager();
 
     public static void broadcastItem(Player player, ItemStack itemStack) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
@@ -73,7 +75,7 @@ public class ItemUtils {
         String second = message.length < 0 ? message[1] : "";
         boolean displayname = Objects.requireNonNull(item.getItemMeta()).hasDisplayName();
         TextComponent component = new TextComponent(first.replace("<player>", name));
-        TextComponent component1 = new TextComponent(!displayname ? item.getType().toString() : item.getItemMeta().getDisplayName());
+        TextComponent component1 = new TextComponent(!displayname ? Optional.ofNullable(configManager.getItemName(item.getType())).orElse("") : item.getItemMeta().getDisplayName());
         TextComponent component2 = new TextComponent(second);
         component1.setHoverEvent(event);
         component.addExtra(component1);

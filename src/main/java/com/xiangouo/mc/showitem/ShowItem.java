@@ -39,7 +39,7 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
         plugin = this;
         this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        configManager.createConfig();
+        ConfigManager.createConfig(this);
         Optional.ofNullable(getCommand("showitem")).ifPresent(c -> c.setExecutor(new ShowItemCommand(this)));
         Bukkit.getLogger().info(ChatColor.GOLD + "展示插件開啟.....");
     }
