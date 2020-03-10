@@ -2,13 +2,16 @@ package com.xiangouo.mc.showitem;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.logging.Level;
 
 /*
     This class is copied from web
@@ -236,5 +239,38 @@ public class ReflectionUtil {
             loadedFields.put(clazz, fields);
             return Optional.empty();
         }
+    }
+
+    /*
+   copied from HNMCUtils
+    */
+    public static String convertItemStackToJson(ItemStack itemStack) {
+        // ItemStack methods to get a net.minecraft.server.ItemStack object for serialization
+        Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
+        Optional<Method> asNMSCopyMethodOpt = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
+
+        // NMS Method to serialize a net.minecraft.server.ItemStack to a valid Json string
+        Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
+        Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
+        Optional<Method> saveNmsItemStackMethodOpt = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
+
+        Object nmsNbtTagCompoundObj; // This will just be an empty NBTTagCompound instance to invoke the saveNms method
+        Object nmsItemStackObj; // This is the net.minecraft.server.ItemStack object received from the asNMSCopy method
+        Object itemAsJsonObject; // This is the net.minecraft.server.ItemStack after being put through saveNmsItem method
+
+
+        try {
+            Method asNMSCopyMethod = asNMSCopyMethodOpt.orElseThrow(() -> new NoSuchElementException("找不到 CraftItemStack 的 asNMSCopy 方法"));
+            Method saveNmsItemStackMethod = saveNmsItemStackMethodOpt.orElseThrow(() -> new NoSuchElementException("找不到 ItemStack 的 save 方法"));
+            nmsNbtTagCompoundObj = nbtTagCompoundClazz.getConstructor().newInstance();
+            nmsItemStackObj = asNMSCopyMethod.invoke(null, itemStack);
+            itemAsJsonObject = saveNmsItemStackMethod.invoke(nmsItemStackObj, nmsNbtTagCompoundObj);
+        } catch (Throwable t) {
+            Bukkit.getLogger().log(Level.SEVERE, "ItemStack 轉換json失敗", t);
+            return null;
+        }
+
+        // Return a string representation of the serialized object
+        return itemAsJsonObject.toString();
     }
 }

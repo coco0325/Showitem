@@ -1,5 +1,6 @@
 package com.xiangouo.mc.showitem;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -13,7 +14,6 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,12 +53,14 @@ public class ShowItemCommand implements CommandExecutor {
         }
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
-        if (itemStack.getType() != Material.AIR) {
-            boolean displayname = Objects.requireNonNull(itemStack.getItemMeta()).hasDisplayName();
-            ItemUtils.broadcastItem(player, itemStack);
-            player.sendMessage(ShowItem.getMessage("message").replace("<Item>", !displayname ? itemStack.getType().toString() : itemStack.getItemMeta().getDisplayName()));
+        if (itemStack.getType() == Material.AIR) {
+            //
         }
-         lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
+        ItemUtils.broadcastItem(player, itemStack);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+        }
+        lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
         return true;
     }
 
