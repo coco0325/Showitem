@@ -35,7 +35,7 @@ public class ShowItemCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (!player.hasPermission("showitem.use")) {
-            player.sendMessage(ChatColor.RED + "你沒有權限這麼做!!");
+            player.sendMessage(ChatColor.RED + "物品展示 > 你沒有權限這麼做!!");
             return true;
         }
 
