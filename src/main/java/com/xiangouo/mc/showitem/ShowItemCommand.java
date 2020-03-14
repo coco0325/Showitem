@@ -54,7 +54,8 @@ public class ShowItemCommand implements CommandExecutor {
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
         if (itemStack.getType() == Material.AIR) {
-            //
+            player.sendMessage(ShowItem.getMessage("air-message"));
+            return true;
         }
         ItemUtils.broadcastItem(player, itemStack);
         for (Player p : Bukkit.getOnlinePlayers()) {

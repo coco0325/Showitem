@@ -1,3 +1,4 @@
-cooldown: 1000
-cooldown-message: "&e展示物品// &7你發送指令太快，請等待 <sec> 秒!"
-message: "&e展示物品// &7<player> 展示了 &7<Item> !"
+cooldown: 15000
+cooldown-message: "&7物品展示 &7> 指令發送冷卻 請等待 <sec> 秒!"
+message: "&7物品展示 &7> &6<player> &7展示了 <Item>"
+air-message: "&7物品展示 &7> 請在手中拿著要展示的物品"
