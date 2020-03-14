@@ -72,7 +72,7 @@ public class ItemUtils {
         HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents);
         String[] message = ShowItem.getMessage("message").split("<Item>");
         String first = message[0];
-        String second = message.length < 0 ? message[1] : "";
+        String second = message.length >= 2 ? message[1] : "";
         boolean displayname = Objects.requireNonNull(item.getItemMeta()).hasDisplayName();
         TextComponent component = new TextComponent(first.replace("<player>", name));
         TextComponent component1 = new TextComponent(!displayname ? Optional.ofNullable(configManager.getItemName(item.getType())).orElse(item.getType().toString()) : item.getItemMeta().getDisplayName());
