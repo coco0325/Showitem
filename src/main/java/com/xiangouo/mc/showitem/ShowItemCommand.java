@@ -1,7 +1,6 @@
 package com.xiangouo.mc.showitem;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -28,40 +27,48 @@ public class ShowItemCommand implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("not player");
+            sender.sendMessage(ShowItem.getMessage("not-player"));
             return true;
         }
 
         Player player = (Player) sender;
 
         if (!player.hasPermission("showitem.use")) {
-            player.sendMessage(ChatColor.RED + "物品展示 > 你沒有權限這麼做!!");
+            player.sendMessage(ShowItem.getMessage("no-perm"));
             return true;
         }
 
+        if(args.length == 0){
+            int cooldown = plugin.getConfig().getInt("cooldown");
 
-        int cooldown = plugin.getConfig().getInt("cooldown");
+            if (lastCommandExecute.containsKey(player.getUniqueId())) {
+                LocalDateTime previousTalkTime = lastCommandExecute.get(player.getUniqueId());
+                Duration duration = Duration.between(previousTalkTime, LocalDateTime.now());
+                if (duration.toMillis() < cooldown) {
+                    double sec = BigDecimal.valueOf((double) (cooldown - duration.toMillis()) / 1000).setScale(1, RoundingMode.HALF_EVEN).doubleValue();
+                    player.sendMessage(ShowItem.getMessage("cooldown-message").replace("<sec>", sec + ""));
+                    return true;
+                }
+            }
 
-        if (lastCommandExecute.containsKey(player.getUniqueId())) {
-            LocalDateTime previousTalkTime = lastCommandExecute.get(player.getUniqueId());
-            Duration duration = Duration.between(previousTalkTime, LocalDateTime.now());
-            if (duration.toMillis() < cooldown) {
-                double sec = BigDecimal.valueOf((double) (cooldown - duration.toMillis()) / 1000).setScale(1, RoundingMode.HALF_EVEN).doubleValue();
-                player.sendMessage(ShowItem.getMessage("cooldown-message").replace("<sec>", sec + ""));
+            ItemStack itemStack = player.getInventory().getItemInMainHand();
+            if (itemStack.getType() == Material.AIR) {
+                player.sendMessage(ShowItem.getMessage("hold-air"));
+                return false;
+            }
+            ItemUtils.broadcastItem(player, itemStack);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+            }
+            lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
+            return true;
+        } else {
+            if (args[0].equalsIgnoreCase("reload")){
+                ConfigManager.reloadConfig();
+                player.sendMessage(ShowItem.getMessage("reload"));
                 return true;
             }
         }
-
-        ItemStack itemStack = player.getInventory().getItemInMainHand();
-        if (itemStack.getType() == Material.AIR) {
-            player.sendMessage(ShowItem.getMessage("air-message"));
-            return true;
-        }
-        ItemUtils.broadcastItem(player, itemStack);
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
-        }
-        lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
         return true;
     }
 

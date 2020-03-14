@@ -11,7 +11,7 @@ public class ConfigManager {
     private static FileConfiguration config, item;
     private static File configFile, itemFile;
 
-    public FileConfiguration getConfig() {
+    public static FileConfiguration getConfig() {
         return config;
     }
 
@@ -32,12 +32,16 @@ public class ConfigManager {
         itemFile = new File(plugin.getDataFolder(), "item.yml");
 
         if (!configFile.exists()){
-            plugin.saveResource("config.yml", false);
+            plugin.saveResource("config.yml", true);
             if (!itemFile.exists()){
-                plugin.saveResource("item.yml", false);
+                plugin.saveResource("item.yml", true);
             }
-            config = YamlConfiguration.loadConfiguration(configFile);
-            item = YamlConfiguration.loadConfiguration(itemFile);
         }
+    }
+
+    public static void reloadConfig(){
+        ConfigManager.createConfig(ShowItem.plugin);
+        config = YamlConfiguration.loadConfiguration(configFile);
+        item = YamlConfiguration.loadConfiguration(itemFile);
     }
 }

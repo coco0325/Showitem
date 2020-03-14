@@ -1,4 +1,7 @@
 cooldown: 15000
 cooldown-message: "&7物品展示 &7> 指令發送冷卻 請等待 <sec> 秒!"
+hold-air: "&7物品展示 &7> 請在手中拿著要展示的物品"
 message: "&7物品展示 &7> &6<player> &7展示了 <Item>"
-air-message: "&7物品展示 &7> 請在手中拿著要展示的物品"
+reload: "&e展示物品// &7config.yml 重整完成!"
+no-perm: "&7展示物品 > &c你沒有權限這麼做!!"
+not-player: "&e展示物品// &c你不是玩家!!"
