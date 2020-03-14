@@ -1,3 +1,7 @@
 cooldown: 1000
 cooldown-message: "&e展示物品// &7你發送指令太快，請等待 <sec> 秒!"
+hold-air: "&e展示物品// &7你手上沒有拿任何東西!"
 message: "&e展示物品// &7<player> 展示了 &7<Item> !"
+reload: "&e展示物品// &7config.yml 重整完成!"
+no-perm: "&e展示物品// &c你沒有權限這麼做!!"
+not-player: "&e展示物品// &c你不是玩家!!"
