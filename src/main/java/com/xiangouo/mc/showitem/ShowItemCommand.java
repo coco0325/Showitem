@@ -53,7 +53,7 @@ public class ShowItemCommand implements CommandExecutor {
 
             ItemStack itemStack = player.getInventory().getItemInMainHand();
             if (itemStack.getType() == Material.AIR) {
-                player.sendMessage(ShowItem.getMessage("hold-air"));
+                player.sendMessage(ShowItem.getMessage("air-message"));
                 return false;
             }
             ItemUtils.broadcastItem(player, itemStack);
@@ -63,10 +63,12 @@ public class ShowItemCommand implements CommandExecutor {
             lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
             return true;
         } else {
-            if (args[0].equalsIgnoreCase("reload")){
+            if (args[0].equalsIgnoreCase("reload") && player.hasPermission("showitem.admin")){
                 ConfigManager.reloadConfig();
                 player.sendMessage(ShowItem.getMessage("reload"));
                 return true;
+            } else {
+                player.sendMessage(ShowItem.getMessage("no-perm"));
             }
         }
         return true;

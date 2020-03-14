@@ -12,3 +12,5 @@ commands:
 permissions:
   showitem.use:
     description: show item permission.
+  showitem.reload:
+    description: show item admin permission
