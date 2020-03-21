@@ -64,7 +64,7 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
                    Map<String, Object> map = (Map<String, Object>) key.getValue();
                    for (Map.Entry<String, Object> map1 : map.entrySet()){
                        if(map1.getKey().equals("Damage")){
-                           Double value1 = (double) map1.getValue();
+                           Double value1 = (Double) map1.getValue();
                            map1.setValue(value1.intValue());
                        }
                    }
