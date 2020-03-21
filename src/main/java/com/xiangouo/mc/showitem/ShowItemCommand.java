@@ -62,14 +62,6 @@ public class ShowItemCommand implements CommandExecutor {
             }
             lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
             return true;
-        } else {
-            if (args[0].equalsIgnoreCase("reload") && player.hasPermission("showitem.admin")){
-                ConfigManager.reloadConfig();
-                player.sendMessage(ShowItem.getMessage("reload"));
-                return true;
-            } else {
-                player.sendMessage(ShowItem.getMessage("no-perm"));
-            }
         }
         return true;
     }
