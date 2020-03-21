@@ -53,7 +53,7 @@ public class ShowItemCommand implements CommandExecutor {
 
             ItemStack itemStack = player.getInventory().getItemInMainHand();
             if (itemStack.getType() == Material.AIR) {
-                player.sendMessage(ShowItem.getMessage("hold-air"));
+                player.sendMessage(ShowItem.getMessage("air-message"));
                 return false;
             }
             ItemUtils.broadcastItem(player, itemStack);
