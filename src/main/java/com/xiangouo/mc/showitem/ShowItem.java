@@ -58,6 +58,18 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
             String input = inputStream.readUTF();
             Gson gson = new Gson();
             Map<String, Object> json = (Map<String, Object>) gson.fromJson(input, Map.class);
+            for (Map.Entry<String, Object> key : json.entrySet()){
+                String key1 = key.getKey();
+                if(key1.contains("meta")){
+                   Map<String, Object> map = (Map<String, Object>) key.getValue();
+                   for (Map.Entry<String, Object> map1 : map.entrySet()){
+                       if(map1.getKey().equals("Damage")){
+                           Double value1 = (double) map1.getValue();
+                           map1.setValue(value1.intValue());
+                       }
+                   }
+                }
+            }
             ItemStack itemStack = ItemUtils.deserialize(json);
             for (Player player : Bukkit.getOnlinePlayers()) {
                 ItemUtils.sendItemTooltipMessage(player, showingPlayer, itemStack);
