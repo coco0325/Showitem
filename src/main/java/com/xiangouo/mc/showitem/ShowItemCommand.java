@@ -62,12 +62,6 @@ public class ShowItemCommand implements CommandExecutor {
             }
             lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
             return true;
-        } else {
-            if (args[0].equalsIgnoreCase("reload")){
-                ConfigManager.reloadConfig();
-                player.sendMessage(ShowItem.getMessage("reload"));
-                return true;
-            }
         }
         return true;
     }
