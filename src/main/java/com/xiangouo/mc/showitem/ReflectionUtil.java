@@ -1,7 +1,5 @@
 package com.xiangouo.mc.showitem;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.server.v1_15_R1.MojangsonParser;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
