@@ -30,7 +30,8 @@ public class ItemUtils {
         out.writeUTF("Forward"); // So BungeeCord knows to forward it
         out.writeUTF("ALL");
         out.writeUTF(CHANNEL); // The channel name to check if this your data
-        String s = GSON.toJson(serialize(itemStack));
+        String s = ReflectionUtil.convertItemStackToJson(itemStack);
+        System.out.println("Orign：" + s);
         try (
             ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
             DataOutputStream msgout = new DataOutputStream(msgbytes)) {

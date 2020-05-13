@@ -1,6 +1,6 @@
 name: ShowItem
 main: com.xiangouo.mc.showitem.ShowItem
-version: 1.3
+version: 1.5
 api-version: 1.15
 author: XiangOuO_
 
@@ -12,3 +12,5 @@ commands:
 permissions:
   showitem.use:
     description: show item permission.
+  showitem.look:
+    description: look show item permission.

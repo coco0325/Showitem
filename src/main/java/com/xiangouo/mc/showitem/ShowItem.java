@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ShowItem extends JavaPlugin implements PluginMessageListener {
@@ -56,23 +57,48 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
             in.readFully(bytesMessage);
             String showingPlayer = inputStream.readUTF();
             String input = inputStream.readUTF();
-            Gson gson = new Gson();
-            Map<String, Object> json = (Map<String, Object>) gson.fromJson(input, Map.class);
-            for (Map.Entry<String, Object> key : json.entrySet()){
+            System.out.println("Out：" + input);
+            //Gson gson = new Gson();
+            //Map<String, Object> json = (Map<String, Object>) gson.fromJson(input, Map.class);
+            /*for (Map.Entry<String, Object> key : json.entrySet()){
                 String key1 = key.getKey();
+                if(key1.equals("v")){
+                    Double value = (Double) key.getValue();
+                    key.setValue(value.intValue());
+                }
                 if(key1.contains("meta")){
                    Map<String, Object> map = (Map<String, Object>) key.getValue();
-                   for (Map.Entry<String, Object> map1 : map.entrySet()){
-                       if(map1.getKey().equals("Damage")){
-                           Double value1 = (Double) map1.getValue();
-                           map1.setValue(value1.intValue());
+                   for (Map.Entry<String, Object> metaMap : map.entrySet()){
+                       /*if(metaMap.getKey().equals("Damage")){
+                           Double value1 = (Double) metaMap.getValue();
+                           metaMap.setValue(value1.intValue());
+                       }
+                       if(metaMap.getKey().equals("repair-cost")){
+                           Double value1 = (Double) metaMap.getValue();
+                           metaMap.setValue(value1.intValue());
+                       }
+                       if(metaMap.getKey().equals("map-id")){
+                           Double value1 = (Double) metaMap.getValue();
+                           metaMap.setValue(value1.intValue());
+                       }
+                       /*if(metaMap.getKey().equals("enchants")) {
+                           Map<String, Object> enchantsMap = (Map<String, Object>) key.getValue();
+                           for (Map.Entry<String, Object> enchantsMap1 : enchantsMap.entrySet()){
+                               if(enchantsMap1.getKey().equals("DURABILITY")){
+                                   Double value1 = (Double) enchantsMap1.getValue();
+                                   enchantsMap1.setValue(value1.intValue());
+                               }
+                           }
                        }
                    }
                 }
-            }
-            ItemStack itemStack = ItemUtils.deserialize(json);
+            }*/
+            //System.out.println("Out Json：" + json);
+            ItemStack itemStack = ReflectionUtil.deserializeItemStackFromNBTJson(input);
             for (Player player : Bukkit.getOnlinePlayers()) {
-                ItemUtils.sendItemTooltipMessage(player, showingPlayer, itemStack);
+                if (player.hasPermission("showitem.look")) {
+                    ItemUtils.sendItemTooltipMessage(player, showingPlayer, itemStack);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
