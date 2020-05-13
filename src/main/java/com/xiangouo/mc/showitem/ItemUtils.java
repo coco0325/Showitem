@@ -22,7 +22,6 @@ import java.util.Optional;
 public class ItemUtils {
 
     public static final String CHANNEL = "ShowItem";
-    private static final Gson GSON = new Gson();
     private static ConfigManager configManager = new ConfigManager();
 
     public static void broadcastItem(Player player, ItemStack itemStack) {
@@ -43,28 +42,6 @@ public class ItemUtils {
             exception.printStackTrace();
         }
         player.sendPluginMessage(ShowItem.plugin, "BungeeCord", out.toByteArray());
-    }
-
-
-    public static Map<String, Object> serialize(ItemStack itemStack) {
-        Map<String, Object> itemMap = itemStack.serialize();
-        if (itemStack.getItemMeta() != null) {
-            itemMap.put("meta", itemStack.getItemMeta().serialize());
-        }
-        return itemMap;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static ItemStack deserialize(Map<String, Object> map) {
-        if (map.get("meta") instanceof Map) {
-            Map<String, Object> obj = (Map<String, Object>) map.get("meta");
-            Class<?> cls = ConfigurationSerialization.getClassByAlias(ItemMeta.class.getSimpleName());
-            if (cls != null) {
-                ItemMeta meta = (ItemMeta) ConfigurationSerialization.deserializeObject(obj, (Class<? extends ConfigurationSerializable>) cls);
-                map.put("meta", meta);
-            }
-        }
-        return ItemStack.deserialize(map);
     }
 
     public static void sendItemTooltipMessage(Player player, String name, ItemStack item) {
