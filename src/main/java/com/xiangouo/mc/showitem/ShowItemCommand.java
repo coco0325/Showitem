@@ -58,7 +58,7 @@ public class ShowItemCommand implements CommandExecutor {
                 return false;
             }
             for(String blacklist : ConfigManager.getBlacklist().getStringList("blacklist")) {
-                if (Objects.requireNonNull(itemStack.getItemMeta()).getDisplayName().equals(blacklist)) {
+                if (Objects.requireNonNull(itemStack.getItemMeta()).getDisplayName().contains(blacklist)) {
                     player.sendMessage(ShowItem.getMessage("blacklist-message"));
                 } else {
                     ItemUtils.broadcastItem(player, itemStack);
