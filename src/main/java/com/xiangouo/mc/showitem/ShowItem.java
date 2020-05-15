@@ -2,7 +2,6 @@ package com.xiangouo.mc.showitem;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
-import com.google.gson.Gson;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -14,7 +13,6 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 
 public class ShowItem extends JavaPlugin implements PluginMessageListener {
@@ -56,23 +54,11 @@ public class ShowItem extends JavaPlugin implements PluginMessageListener {
             in.readFully(bytesMessage);
             String showingPlayer = inputStream.readUTF();
             String input = inputStream.readUTF();
-            Gson gson = new Gson();
-            Map<String, Object> json = (Map<String, Object>) gson.fromJson(input, Map.class);
-            for (Map.Entry<String, Object> key : json.entrySet()){
-                String key1 = key.getKey();
-                if(key1.contains("meta")){
-                   Map<String, Object> map = (Map<String, Object>) key.getValue();
-                   for (Map.Entry<String, Object> map1 : map.entrySet()){
-                       if(map1.getKey().equals("Damage")){
-                           Double value1 = (Double) map1.getValue();
-                           map1.setValue(value1.intValue());
-                       }
-                   }
-                }
-            }
-            ItemStack itemStack = ItemUtils.deserialize(json);
+            ItemStack itemStack = ReflectionUtil.deserializeItemStackFromNBTJson(input);
             for (Player player : Bukkit.getOnlinePlayers()) {
-                ItemUtils.sendItemTooltipMessage(player, showingPlayer, itemStack);
+                if (player.hasPermission("showitem.look")) {
+                    ItemUtils.sendItemTooltipMessage(player, showingPlayer, itemStack);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -13,7 +13,7 @@
 
     <groupId>com.xiangouo.mc</groupId>
     <artifactId>Showitem</artifactId>
-    <version>1.3</version>
+    <version>1.5</version>
     <build>
         <plugins>
             <plugin>

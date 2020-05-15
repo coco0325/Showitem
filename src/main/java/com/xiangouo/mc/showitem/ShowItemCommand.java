@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,9 +57,15 @@ public class ShowItemCommand implements CommandExecutor {
                 player.sendMessage(ShowItem.getMessage("air-message"));
                 return false;
             }
-            ItemUtils.broadcastItem(player, itemStack);
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+            for(String blacklist : ConfigManager.getBlacklist().getStringList("blacklist")) {
+                if (Objects.requireNonNull(itemStack.getItemMeta()).getDisplayName().contains(blacklist)) {
+                    player.sendMessage(ShowItem.getMessage("blacklist-message"));
+                } else {
+                    ItemUtils.broadcastItem(player, itemStack);
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+                    }
+                }
             }
             lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
             return true;

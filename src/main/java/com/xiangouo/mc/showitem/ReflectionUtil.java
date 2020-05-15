@@ -28,6 +28,11 @@ public class ReflectionUtil {
     private static String versionString;
 
     /*
+     * Cache of Mojang classes that we've searched for
+     */
+    private static Map<String, Class<?>> loadedMojangClasses = new HashMap<String, Class<?>>();
+
+    /*
      * Cache of NMS classes that we've searched for
      */
     private static Map<String, Class<?>> loadedNMSClasses = new HashMap<String, Class<?>>();
@@ -82,6 +87,30 @@ public class ReflectionUtil {
         }
 
         loadedNMSClasses.put(nmsClassName, clazz);
+        return Optional.ofNullable(clazz);
+    }
+
+    /**
+     * Get an NMS Class
+     *
+     * @param mojangClassName The name of the class
+     * @return The class
+     */
+    public static Optional<Class<?>> getMojangClass(String mojangClassName) {
+        if (loadedMojangClasses.containsKey(mojangClassName)) {
+            return Optional.ofNullable(loadedNMSClasses.get(mojangClassName));
+        }
+        String clazzName = "net.minecraft.server." + mojangClassName;
+        Class<?> clazz;
+
+        try {
+            clazz = Class.forName(clazzName);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return Optional.ofNullable(loadedMojangClasses.put(mojangClassName, null));
+        }
+
+        loadedMojangClasses.put(mojangClassName, clazz);
         return Optional.ofNullable(clazz);
     }
 
@@ -272,5 +301,35 @@ public class ReflectionUtil {
 
         // Return a string representation of the serialized object
         return itemAsJsonObject.toString();
+    }
+
+    public static ItemStack deserializeItemStackFromNBTJson(String json) {
+        Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
+        Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
+        Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
+        Class<?> MojangsonParserClazz = ReflectionUtil.getNMSClass("MojangsonParser").orElseThrow(() -> new IllegalStateException("錯誤訊息"));
+
+        Optional<Method> asCraftMirrorMethodOpt = ReflectionUtil.getMethod(craftItemStackClazz, "asCraftMirror", nmsItemStackClazz);
+
+        Optional<Method> aMethodOpt = ReflectionUtil.getMethod(nmsItemStackClazz, "a", nbtTagCompoundClazz);
+
+        Optional<Method> parseMethodOpt = ReflectionUtil.getMethod(MojangsonParserClazz, "parse", String.class);
+
+        Object nmsItemStackObj;
+        Object craftItemStackObj;
+        Object MojangsonParserObj;
+
+        try {
+            Method asCraftMirrorMethod = asCraftMirrorMethodOpt.orElseThrow(() -> new NoSuchElementException("找不到 CraftItemStack 的 asCraftMirror 方法"));
+            Method aMethodOptMethod = aMethodOpt.orElseThrow(() -> new NoSuchElementException("找不到 ItemStack 的 a 方法"));
+            Method parseMethodOptMethod = parseMethodOpt.orElseThrow(() -> new NoSuchElementException("找不到 MojangsonParser 的 parse 方法"));
+            MojangsonParserObj = parseMethodOptMethod.invoke(null, json);
+            nmsItemStackObj = aMethodOptMethod.invoke(null, MojangsonParserObj);
+            craftItemStackObj = asCraftMirrorMethod.invoke(null, nmsItemStackObj);
+        } catch (Throwable t) {
+            Bukkit.getLogger().log(Level.SEVERE, "json 轉換 ItemStack 失敗", t);
+            return null;
+        }
+        return (ItemStack) craftItemStackObj;
     }
 }
