@@ -63,7 +63,9 @@ public class ShowItemCommand implements CommandExecutor {
                 } else {
                     ItemUtils.broadcastItem(player, itemStack);
                     for (Player p : Bukkit.getOnlinePlayers()) {
-                        ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+                        if (player.hasPermission("showitem.look")) {
+                            ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+                        }
                     }
                 }
             }

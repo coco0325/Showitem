@@ -28,11 +28,6 @@ public class ReflectionUtil {
     private static String versionString;
 
     /*
-     * Cache of Mojang classes that we've searched for
-     */
-    private static Map<String, Class<?>> loadedMojangClasses = new HashMap<String, Class<?>>();
-
-    /*
      * Cache of NMS classes that we've searched for
      */
     private static Map<String, Class<?>> loadedNMSClasses = new HashMap<String, Class<?>>();
@@ -87,30 +82,6 @@ public class ReflectionUtil {
         }
 
         loadedNMSClasses.put(nmsClassName, clazz);
-        return Optional.ofNullable(clazz);
-    }
-
-    /**
-     * Get an NMS Class
-     *
-     * @param mojangClassName The name of the class
-     * @return The class
-     */
-    public static Optional<Class<?>> getMojangClass(String mojangClassName) {
-        if (loadedMojangClasses.containsKey(mojangClassName)) {
-            return Optional.ofNullable(loadedNMSClasses.get(mojangClassName));
-        }
-        String clazzName = "net.minecraft.server." + mojangClassName;
-        Class<?> clazz;
-
-        try {
-            clazz = Class.forName(clazzName);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return Optional.ofNullable(loadedMojangClasses.put(mojangClassName, null));
-        }
-
-        loadedMojangClasses.put(mojangClassName, clazz);
         return Optional.ofNullable(clazz);
     }
 
