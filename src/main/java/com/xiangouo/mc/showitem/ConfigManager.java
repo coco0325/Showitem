@@ -34,15 +34,16 @@ public class ConfigManager {
         itemFile = new File(plugin.getDataFolder(), "item.yml");
         blacklistFile = new File(plugin.getDataFolder(), "blacklist.yml");
 
-        if (!configFile.exists()){
+        if (!configFile.exists()) {
             plugin.saveResource("config.yml", true);
-            if (!itemFile.exists()){
-                plugin.saveResource("item.yml", true);
-            }
-            if (!blacklistFile.exists()){
-                plugin.saveResource("blacklist.yml", true);
-            }
         }
+        if (!itemFile.exists()){
+            plugin.saveResource("item.yml", true);
+        }
+        if (!blacklistFile.exists()){
+            plugin.saveResource("blacklist.yml", true);
+        }
+
     }
 
     public static void reloadConfig(){
