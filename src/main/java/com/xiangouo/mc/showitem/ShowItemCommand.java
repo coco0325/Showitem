@@ -55,21 +55,21 @@ public class ShowItemCommand implements CommandExecutor {
             ItemStack itemStack = player.getInventory().getItemInMainHand();
             if (itemStack.getType() == Material.AIR) {
                 player.sendMessage(ShowItem.getMessage("air-message"));
-                return false;
+                return true;
             }
+            lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
             for(String blacklist : ConfigManager.getBlacklist().getStringList("blacklist")) {
                 if (Objects.requireNonNull(itemStack.getItemMeta()).getDisplayName().contains(blacklist)) {
                     player.sendMessage(ShowItem.getMessage("blacklist-message"));
-                } else {
-                    ItemUtils.broadcastItem(player, itemStack);
-                    for (Player p : Bukkit.getOnlinePlayers()) {
-                        if (player.hasPermission("showitem.look")) {
-                            ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
-                        }
-                    }
+                    return true;
                 }
             }
-            lastCommandExecute.put(player.getUniqueId(), LocalDateTime.now());
+            ItemUtils.broadcastItem(player, itemStack);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (player.hasPermission("showitem.look")) {
+                    ItemUtils.sendItemTooltipMessage(p, player.getDisplayName(), itemStack);
+                }
+            }
             return true;
         }
         return true;

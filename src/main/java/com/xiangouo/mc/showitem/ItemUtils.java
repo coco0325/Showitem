@@ -30,7 +30,7 @@ public class ItemUtils {
         out.writeUTF("ALL");
         out.writeUTF(CHANNEL); // The channel name to check if this your data
         String s = ReflectionUtil.convertItemStackToJson(itemStack);
-        System.out.println("Orign：" + s);
+        //System.out.println("Orign：" + s);
         try (
             ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
             DataOutputStream msgout = new DataOutputStream(msgbytes)) {
